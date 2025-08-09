@@ -1,0 +1,60 @@
+# compose.yaml
+name: llama-universal
+
+x-common-env: &common-env
+  LLAMA_ARG_HOST: 0.0.0.0
+  LLAMA_ARG_PORT: "${PORT:-8080}"
+  # Choisis A) modèle local OU B) Hugging Face :
+  # A) local :
+  LLAMA_ARG_MODEL: "${MODEL_PATH:-/models/model.gguf}"
+  # B) Hugging Face (décommente si tu préfères) :
+  # LLAMA_ARG_HF_REPO: "${HF_REPO:-Qwen/Qwen2.5-7B-Instruct-GGUF}"
+  # LLAMA_ARG_HF_FILE: "${HF_FILE:-qwen2.5-7b-instruct-q4_k_m.gguf}"
+  # HF_TOKEN: "${HF_TOKEN:-}"   # requis pour modèles gated (Llama*)
+
+x-common-vols: &common-vols
+  - ./models:/models
+  - ./cache:/root/.cache
+
+services:
+  llama-cuda:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    profiles: ["cuda"]
+    ports: ["${PORT:-8080}:8080"]
+    environment: *common-env
+    volumes: *common-vols
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  llama-rocm:
+    image: ghcr.io/ggml-org/llama.cpp:server-rocm
+    profiles: ["rocm"]
+    ports: ["${PORT:-8080}:8080"]
+    environment: *common-env
+    volumes: *common-vols
+
+  llama-intel:
+    image: ghcr.io/ggml-org/llama.cpp:server-intel
+    profiles: ["intel"]
+    ports: ["${PORT:-8080}:8080"]
+    environment: *common-env
+    volumes: *common-vols
+
+  llama-vulkan:
+    image: ghcr.io/ggml-org/llama.cpp:server-vulkan
+    profiles: ["vulkan"]
+    ports: ["${PORT:-8080}:8080"]
+    environment: *common-env
+    volumes: *common-vols
+
+  llama-cpu:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    profiles: ["cpu"]
+    ports: ["${PORT:-8080}:8080"]
+    environment: *common-env
+    volumes: *common-vols
