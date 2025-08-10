@@ -1,7 +1,10 @@
 # ===== Build CPU =====
 FROM debian:stable AS build_cpu
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y git cmake build-essential libcurl4-openssl-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    git cmake build-essential libcurl4-openssl-dev && \
+    rm -rf /var/lib/apt/lists/*
+    
 WORKDIR /opt
 ARG LLAMA_CPP_REF=master
 RUN git clone https://github.com/ggml-org/llama.cpp.git && cd llama.cpp && git checkout ${LLAMA_CPP_REF}
