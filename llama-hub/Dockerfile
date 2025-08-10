@@ -48,7 +48,7 @@ COPY --from=build_cuda /opt/llama-server-cuda /usr/local/bin/llama-server-cuda
 WORKDIR /app
 COPY app /app
 
-RUN pip install --no-cache-dir fastapi uvicorn[standard] psutil jinja2 pydantic==2.* huggingface_hub==0.24.*
+RUN pip3 install --no-cache-dir fastapi uvicorn[standard] psutil jinja2 pydantic==2.* huggingface_hub==0.24.* python-multipart
 
 # Data
 RUN mkdir -p /models
