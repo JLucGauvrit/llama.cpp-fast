@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>LLM Hub (llama.cpp)</title>
+  <link rel="stylesheet" href="/static/script.css"/>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
+    .caps, .card { border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    code { background: #fbfbfb; padding: 2px 6px; border-radius: 6px; }
+    button { cursor: pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; }
+    form { display: grid; gap: 8px; }
+    .small { opacity: .8; font-size: 0.92rem; }
+  </style>
+</head>
+<body>
+  <h1>LLM Hub (llama.cpp)</h1>
+
+  <div class="caps">
+    <h3>Capacités détectées</h3>
+    <div class="row">
+      <div><strong>CPU:</strong> {{ caps.cpu_cores }} threads</div>
+      <div><strong>RAM:</strong> {{ caps.ram_gb }} GB</div>
+      <div><strong>GPU NVIDIA:</strong> {{ 'Oui' if caps.gpu_nvidia else 'Non' }}</div>
+      <div><strong>API Port:</strong> <code>{{ caps.server_port }}</code></div>
+      <div><strong>UI:</strong> <code>{{ caps.ui_port }}</code></div>
+    </div>
+    <div class="small">L’API `llama.cpp` sera dispo sur <code>http://localhost:{{ caps.server_port }}</code> une fois lancée.</div>
+  </div>
+
+  <div class="grid">
+    {% for m in catalog %}
+    <div class="card">
+      <h3>{{ m.name }}</h3>
+      <div class="small">{{ m.notes }}</div>
+      <form method="post" action="/launch">
+        <input type="hidden" name="repo_id" value="{{ m.repo_id }}"/>
+        <input type="hidden" name="filename" value="{{ m.filename }}"/>
+        <label>Mode :
+          <select name="mode">
+            <option value="cpu">CPU</option>
+            <option value="gpu">GPU</option>
+          </select>
+        </label>
+        <label>Threads : <input type="number" name="threads" placeholder="{{ caps.defaults.threads }}"/></label>
+        <label>CTX size : <input type="number" name="ctx_size" placeholder="{{ m.recommended_ctx }}"/></label>
+        <label>n_gpu_layers : <input type="number" name="n_gpu_layers" placeholder="{{ caps.defaults.n_gpu_layers }}"/></label>
+        <label>batch / ubatch :
+          <div class="row">
+            <input type="number" name="batch_size" placeholder="{{ caps.defaults.batch_size }}"/>
+            <input type="number" name="ubatch_size" placeholder="{{ caps.defaults.ubatch_size }}"/>
+          </div>
+        </label>
+        <button type="submit">Lancer</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="/stop">
+    <button style="background:#ffecec">Arrêter le serveur</button>
+  </form>
+
+  <hr/>
+  <p class="small">
+    Appels API exemples :
+    <pre><code>curl http://localhost:8080/health
+
+curl http://localhost:8080/completion \
+  -H "Content-Type: application/json" \
+  -d '{ "prompt": "Bonjour, 2+2 = ?", "n_predict": 64 }'</code></pre>
+  </p>
+</body>
+</html>
