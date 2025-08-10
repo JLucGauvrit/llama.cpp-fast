@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  scanner:
+    build: ./scanner
+    container_name: poc_scanner
+    volumes:
+      - ./data:/data
+    environment:
+      - OUTPUT_DIR=/data
+    command: ["python","/app/scan_specs.py"]
+
+  downloader:
+    build: ./downloader
+    container_name: poc_downloader
+    depends_on:
+      - scanner
+    volumes:
+      - ./models:/models
+      - ./data:/data
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+    command: ["python","/app/download_model.py"]
+
+  quantizer:
+    build: ./quantizer
+    container_name: poc_quantizer
+    depends_on:
+      - downloader
+    volumes:
+      - ./models:/models
+    command: ["/app/quantize.sh"]
+
+  inference:
+    build: ./inference
+    container_name: poc_inference
+    depends_on:
+      - quantizer
+    volumes:
+      - ./models:/models
+    ports:
+      - "8080:8080"
+    command: ["/app/run_server.sh"]
+    

@@ -1,9 +1,0 @@
-version: '3.8'
-services:
-  llama:
-    build: ./llama.cpp
-    container_name: llama_cpp
-    volumes:
-      - ./llama.cpp:/workspace
-    working_dir: /workspace
-    tty: true
