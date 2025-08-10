@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  llama-hub:
+    build: .
+    container_name: llama-hub
+    ports:
+      - "8090:8090"   # UI web
+      - "8080:8080"   # API du serveur llama.cpp
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}          # optionnel si modèle privé
+      - THREADS=${THREADS:-8}
+      - CTX_SIZE=${CTX_SIZE:-4096}
+      - N_GPU_LAYERS=${N_GPU_LAYERS:-99}
+      - BATCH_SIZE=${BATCH_SIZE:-256}
+      - UBATCH_SIZE=${UBATCH_SIZE:-64}
+      - HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - UI_PORT=8090
+    volumes:
+      - ./models:/models:rw
+    # Si tu as une NVIDIA : décommente la ligne suivante (sinon laisse commentée)
+    # gpus: all
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "curl -sf http://localhost:8090/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
